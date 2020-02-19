@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <link href="./css/bootstrap.css" rel="stylesheet">
+  <link href="./css/theme.css" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="64x64" href="/img/favicon.png">
+  
+  <title>Wiser</title>
+  
+</head>
+
+<body>
+
+  <header id="header">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand headerfix-brand" href="/">Wiser dla herbacianego ;)</a>
+        </div>
+		<p class="navbar-text navbar-right" style="display:none;" id="pLogged">Zalogowany <a href="#" class="navbar-link" id="aLogged">as</a></p>
+      </div>
+    </nav>
+  </header>
+  <div class="container theme-showcase">
+  
+    <div class="page-header">
+      <h2>Wrzuć link i głosuj</h2>
+    </div>
+
+<div class="content">
+
+<div>
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="input-group">
+        <span class="input-group-addon">Link</span>
+        <input id="link" type="text" class="form-control" value="https://steempeak.com/@mys/dlugi-post" required>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="input-group">
+        <span class="input-group-addon">Procent</span>
+        <input id="percent" type="number" class="form-control" value="25" required min="-100" max="100">
+      </div>
+    </div>
+  </div>
+
+  <br>
+  
+  <div style="margin:0 auto 10px auto; width:40%; display:none;" id="divKeychainLogin">
+		<div class="input-group">
+		  <input id="txtLogin" type="text" class="form-control">
+		  <span class="input-group-btn">
+			<button class="btn btn-default" type="button" onclick="login()">Login Keychain</button>
+		  </span>
+		</div>
+  </div>
+  
+  <div style="margin:0 0 10px 0; display:none;" id="divKeychainSend">
+	<button id="btnSendKeychain" onclick="sendKeychain()" type="button" class="btn btn-success btn btn-block" style="margin:0 auto 0 auto; width:40%;">Wyślij przez SteemKeychain</button>
+  </div>
+  
+  <div style="margin:0 0 10px 0;"><button onclick="sendSteemConnect()" type="button" class="btn btn-primary btn btn-block" style="margin:0 auto 0 auto; width:40%;">Wyślij przez SteemConnect</button></div>
+</div>
+
+<!-- /footer -->
+
+<div style="border-bottom: 1px solid rgba(255, 255, 255, 0.40);margin:40px 0 10px 0;"></div>
+<div class="content footer">steempeak.com / <b><a href="https://steempeak.com/@mys">@mys</a></b></div>
+
+        
+      </div></div> <!-- /container -->
+
+
+    <!-- Bootstrap-JavaScript
+    ================================================== -->
+    <script src="./js/jquery.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+
+<script>
+
+setTimeout(function(){ 
+	var username = localStorage.getItem('username');
+	console.log(username);
+	if (username){
+		document.getElementById("pLogged").style.display = "inline";
+		document.getElementById("aLogged").text = username;
+	}
+	
+	if (window.steem_keychain){
+		if (username){
+			document.getElementById("divKeychainSend").style.display = "block";
+		} else {
+			document.getElementById("divKeychainLogin").style.display = "block";
+		}
+	}
+}, 100);
+
+function login(){
+	let username = document.getElementById("txtLogin").value;
+	if(window.steem_keychain) {
+		steem_keychain.requestSignBuffer(username, 'Log In', 'Posting', function(response) {
+			if(response.error) {
+	  SE.HideLoading();
+	  SE.ShowToast(false, 'Unable to log in with the @' + username + ' account.');
+			} else {
+				localStorage.setItem('username', username);
+				window.location.reload();
+			}
+		});
+	}
+}
+
+function sendKeychain(){
+	let link = document.getElementById("link").value;
+	link = link.substring(link.indexOf("/@") + 2);
+	let percent = document.getElementById("percent").value * 100;
+	let data = link.split('/')
+	let author = data[0];
+	let post = data[1];
+	
+	let json = '["v2:send_voteorder",{"delegator": "gtg","ruleset": "polish_tea","author": "' + author + '","permlink":"' + post + '","weight":' + percent + '}]'
+	steem_keychain.requestCustomJson(localStorage.getItem('username'), 'wise', 'Posting', json, 'Wiser', function(response) {
+		console.log(response);
+	});
+}
+
+function sendSteemConnect(){
+	let link = document.getElementById("link").value;
+	link = link.substring(link.indexOf("/@") + 2);
+	let percent = document.getElementById("percent").value * 100;
+	let data = link.split('/')
+	let author = data[0];
+	let post = data[1];
+	window.open('https://app.steemconnect.com/sign/custom-json?id=wise&json=%5B%22v2%3Asend_voteorder%22%2C%7B%22delegator%22%3A%22gtg%22%2C%22ruleset%22%3A%22polish_tea%22%2C%22author%22%3A%22' + author + '%22%2C%22permlink%22%3A%22' + post + '%22%2C%22weight%22%3A' + percent + '%7D%5D', '_blank').focus();
+}
+
+</script>
+  
+</body></html>
